@@ -195,7 +195,7 @@ function showAdminModal(){
   const modal = document.getElementById('adminModal');
   modal.style.display = 'block';
 
-  // 유저 목록
+  // --- 유저 목록 ---
   const usersDiv = document.getElementById('adminUsers'); 
   usersDiv.innerHTML = '<h4>유저 목록</h4>';
 
@@ -205,12 +205,31 @@ function showAdminModal(){
       const u = users[uid];
       const div = document.createElement('div');
       div.className = 'userCard';
-      div.textContent = `${u.nick} / ${u.email}`;
+      div.style.justifyContent = 'space-between';
+      
+      const span = document.createElement('span');
+      span.textContent = `${u.nick} / ${u.email}`;
+      div.appendChild(span);
+
+      // 닉네임 변경 버튼 (관리자가 가능)
+      if(uid !== currentUser.uid){ 
+        const btn = document.createElement('button');
+        btn.textContent = '닉네임 변경';
+        btn.onclick = () => {
+          const newNick = prompt('새 닉네임을 입력하세요', u.nick);
+          if(newNick){
+            db.ref('users/' + uid).update({nick: newNick});
+            showAdminModal(); // 갱신
+          }
+        };
+        div.appendChild(btn);
+      }
+
       usersDiv.appendChild(div);
     });
   });
 
-  // 채팅 관리
+  // --- 채팅 관리 ---
   const chatDiv = document.getElementById('adminChat'); 
   chatDiv.innerHTML = '<h4>채팅 관리</h4>';
 
@@ -225,14 +244,14 @@ function showAdminModal(){
 
       const btn = document.createElement('button');
       btn.textContent = '삭제';
-      btn.onclick = () => { db.ref('messages/'+k).remove(); showAdminModal(); };
+      btn.onclick = ()=>{ db.ref('messages/'+k).remove(); showAdminModal(); };
       div.appendChild(btn);
       chatDiv.appendChild(div);
     });
   });
 
-  // **닫기 버튼 이벤트 연결**
-  document.getElementById('adminModal').querySelector('button:last-child').onclick = closeAdmin;
+  // 닫기 버튼 이벤트
+  modal.querySelector('button:last-child').onclick = closeAdmin;
 }
 
 function closeAdmin(){
